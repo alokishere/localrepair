@@ -148,7 +148,10 @@ async function currentUser(req, res, next) {
     if (user.role === "TECHNICIAN")
       data.technicianProfile = await TechnicianProfile.findOne({
         userId: user._id,
-      });
+      }).populate({ path: "serviceCategories", select: "name slug icon" });
+    data.profileComplete = user.role === "CUSTOMER"
+      ? Boolean(user.name && user.phone && user.addressLine && user.city && user.pincode)
+      : Boolean(user.name && user.phone && data.technicianProfile?.serviceArea && data.technicianProfile?.serviceCategories?.length && data.technicianProfile?.experienceYears !== undefined && data.technicianProfile?.startingPrice !== undefined);
     return res.json({ success: true, message: "Authenticated user", data });
   } catch (error) {
     if (error instanceof mongoose.Error.CastError)

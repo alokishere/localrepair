@@ -37,6 +37,9 @@ const technicianProfileSchema = new mongoose.Schema(
     location: { type: pointSchema, required: false },
     serviceRadiusKm: { type: Number, min: 1, max: 500, default: 10 },
     serviceArea: { type: String, trim: true, maxlength: 200 },
+    city: { type: String, trim: true, maxlength: 80 },
+    pincode: { type: String, trim: true, match: /^\d{4,10}$/ },
+    startingPrice: { type: Number, min: 0, max: 1000000 },
     verificationStatus: {
       type: String,
       enum: VERIFICATION_STATUSES,

@@ -42,7 +42,7 @@ async function resolveAddress(customerId, addressId, address) {
 
 function repairResponse(repair) {
   const address = repair.addressId && typeof repair.addressId === 'object' ? { id: repair.addressId._id, label: repair.addressId.label, fullAddress: repair.addressId.fullAddress, city: repair.addressId.city, state: repair.addressId.state, pincode: repair.addressId.pincode } : undefined;
-  return { id: repair._id, customerId: repair.customerId && typeof repair.customerId === 'object' ? repair.customerId._id : repair.customerId, technicianId: repair.technicianId && typeof repair.technicianId === 'object' ? repair.technicianId._id : repair.technicianId, categoryId: repair.categoryId, applianceId: repair.applianceId, title: repair.title, problemDescription: repair.problemDescription, diagnosisSuggestion: repair.diagnosisSuggestion, addressId: address?.id || repair.addressId, address, preferredDate: repair.preferredDate, preferredTime: repair.preferredTime, status: repair.status, estimatedCost: repair.estimatedCost, customerNotes: repair.customerNotes, createdAt: repair.createdAt, technician: repair.technicianId && typeof repair.technicianId === 'object' ? safeUser(repair.technicianId) : undefined, customer: repair.customerId && typeof repair.customerId === 'object' ? safeUser(repair.customerId) : undefined };
+  return { id: repair._id, customerId: repair.customerId && typeof repair.customerId === 'object' ? repair.customerId._id : repair.customerId, technicianId: repair.technicianId && typeof repair.technicianId === 'object' ? repair.technicianId._id : repair.technicianId, categoryId: repair.categoryId, category: repair.categoryId && typeof repair.categoryId === 'object' ? { id: repair.categoryId._id, name: repair.categoryId.name, slug: repair.categoryId.slug } : undefined, applianceId: repair.applianceId, title: repair.title, problemDescription: repair.problemDescription, diagnosisSuggestion: repair.diagnosisSuggestion, addressId: address?.id || repair.addressId, address, preferredDate: repair.preferredDate, preferredTime: repair.preferredTime, status: repair.status, estimatedCost: repair.estimatedCost, customerNotes: repair.customerNotes, createdAt: repair.createdAt, technician: repair.technicianId && typeof repair.technicianId === 'object' ? safeUser(repair.technicianId) : undefined, customer: repair.customerId && typeof repair.customerId === 'object' ? safeUser(repair.customerId) : undefined };
 }
 
 function dashboardStatus(status) { return status === 'SEARCHING' ? 'PENDING' : status === 'TECHNICIAN_ON_WAY' ? 'ON_THE_WAY' : status; }
@@ -79,7 +79,7 @@ async function createRepair(req, res, next) {
 function repairQueryForUser(req) { return req.auth.role === 'CUSTOMER' ? { customerId: req.auth.userId } : { technicianId: req.auth.userId }; }
 
 async function listRepairs(req, res, next) {
-  try { const repairs = await Repair.find(repairQueryForUser(req)).sort({ createdAt: -1 }).populate({ path: 'technicianId', select: 'name avatar' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' }).lean(); return res.json({ success: true, message: 'Repairs retrieved', data: { repairs: repairs.map(repairResponse) } }); } catch (error) { return next(error); }
+  try { const repairs = await Repair.find(repairQueryForUser(req)).sort({ createdAt: -1 }).populate({ path: 'technicianId', select: 'name avatar' }).populate({ path: 'customerId', select: 'name avatar' }).populate({ path: 'categoryId', select: 'name slug' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' }).lean(); return res.json({ success: true, message: 'Repairs retrieved', data: { repairs: repairs.map(repairResponse) } }); } catch (error) { return next(error); }
 }
 
 async function getRepair(req, res, next) {
@@ -88,7 +88,7 @@ async function getRepair(req, res, next) {
 
 async function listTechnicianBookings(req, res, next) {
   try {
-    const repairs = await Repair.find({ technicianId: req.auth.userId }).sort({ createdAt: -1 }).populate({ path: 'customerId', select: 'name avatar' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' }).lean();
+    const repairs = await Repair.find({ technicianId: req.auth.userId }).sort({ createdAt: -1 }).populate({ path: 'customerId', select: 'name avatar' }).populate({ path: 'categoryId', select: 'name slug' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' }).lean();
     return res.json({ success: true, message: 'Technician bookings retrieved', data: { bookings: repairs.map(bookingResponse) } });
   } catch (error) { return next(error); }
 }
