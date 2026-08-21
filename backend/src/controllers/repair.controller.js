@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Address, Category, Repair, RepairStatusHistory, TechnicianProfile } = require('../models');
+const { Address, Category, Repair, RepairStatusHistory, Review, TechnicianProfile } = require('../models');
 const { getDiagnosis } = require('../utils/diagnosis');
 
 const PHONE_PATTERN = /^[+\d][\d\s-]{7,19}$/;
@@ -83,7 +83,7 @@ async function listRepairs(req, res, next) {
 }
 
 async function getRepair(req, res, next) {
-  try { const repairId = parseId(req.params.id, 'repairId'); const repair = await Repair.findOne({ _id: repairId, ...repairQueryForUser(req) }).populate({ path: 'technicianId', select: 'name avatar' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' }).lean(); if (!repair) return res.status(404).json({ success: false, message: 'Repair not found', errors: [] }); return res.json({ success: true, message: 'Repair retrieved', data: { repair: repairResponse(repair) } }); } catch (error) { return next(error); }
+  try { const repairId = parseId(req.params.id, 'repairId'); const repair = await Repair.findOne({ _id: repairId, ...repairQueryForUser(req) }).populate({ path: 'technicianId', select: 'name avatar' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' }).lean(); if (!repair) return res.status(404).json({ success: false, message: 'Repair not found', errors: [] }); const response = repairResponse(repair); if (req.auth.role === 'CUSTOMER') response.review = await Review.findOne({ repairId, customerId: req.auth.userId }).select('rating comment createdAt').lean(); return res.json({ success: true, message: 'Repair retrieved', data: { repair: response } }); } catch (error) { return next(error); }
 }
 
 async function listTechnicianBookings(req, res, next) {

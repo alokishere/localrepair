@@ -5,6 +5,7 @@ const authRoutes = require("./routes/auth.routes");
 const technicianRoutes = require("./routes/technician.routes");
 const diagnosisRoutes = require("./routes/diagnosis.routes");
 const repairRoutes = require("./routes/repair.routes");
+const reviewRoutes = require("./routes/review.routes");
 const app = express();
 
 const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
@@ -15,6 +16,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", technicianRoutes);
 app.use("/api", diagnosisRoutes);
 app.use("/api", repairRoutes);
+app.use("/api", reviewRoutes);
 
 app.get("/api/health", (req, res) => {
   const databaseConnected = mongoose.connection.readyState === 1;
