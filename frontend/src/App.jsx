@@ -1,13 +1,13 @@
-import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
+import AppRoutes from './routes/AppRoutes'
+import ErrorBoundary from './components/ErrorBoundary'
 
-const App = () => {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold text-center text-blue-500">
-        Hello world!       
-      </h1> 
-    </div>
-  )
-}
+const App = () => (
+  <ErrorBoundary>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  </ErrorBoundary>
+)
 
 export default App
