@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { Address, Category, Repair, TechnicianProfile } = require('../models');
+const { Address, Category, Repair, RepairStatusHistory, TechnicianProfile } = require('../models');
 const { getDiagnosis } = require('../utils/diagnosis');
 
 const PHONE_PATTERN = /^[+\d][\d\s-]{7,19}$/;
@@ -42,8 +42,12 @@ async function resolveAddress(customerId, addressId, address) {
 
 function repairResponse(repair) {
   const address = repair.addressId && typeof repair.addressId === 'object' ? { id: repair.addressId._id, label: repair.addressId.label, fullAddress: repair.addressId.fullAddress, city: repair.addressId.city, state: repair.addressId.state, pincode: repair.addressId.pincode } : undefined;
-  return { id: repair._id, customerId: repair.customerId, technicianId: repair.technicianId && typeof repair.technicianId === 'object' ? repair.technicianId._id : repair.technicianId, categoryId: repair.categoryId, applianceId: repair.applianceId, title: repair.title, problemDescription: repair.problemDescription, diagnosisSuggestion: repair.diagnosisSuggestion, addressId: address?.id || repair.addressId, address, preferredDate: repair.preferredDate, preferredTime: repair.preferredTime, status: repair.status, estimatedCost: repair.estimatedCost, customerNotes: repair.customerNotes, createdAt: repair.createdAt, technician: repair.technicianId && typeof repair.technicianId === 'object' ? safeUser(repair.technicianId) : undefined };
+  return { id: repair._id, customerId: repair.customerId && typeof repair.customerId === 'object' ? repair.customerId._id : repair.customerId, technicianId: repair.technicianId && typeof repair.technicianId === 'object' ? repair.technicianId._id : repair.technicianId, categoryId: repair.categoryId, applianceId: repair.applianceId, title: repair.title, problemDescription: repair.problemDescription, diagnosisSuggestion: repair.diagnosisSuggestion, addressId: address?.id || repair.addressId, address, preferredDate: repair.preferredDate, preferredTime: repair.preferredTime, status: repair.status, estimatedCost: repair.estimatedCost, customerNotes: repair.customerNotes, createdAt: repair.createdAt, technician: repair.technicianId && typeof repair.technicianId === 'object' ? safeUser(repair.technicianId) : undefined, customer: repair.customerId && typeof repair.customerId === 'object' ? safeUser(repair.customerId) : undefined };
 }
+
+function dashboardStatus(status) { return status === 'SEARCHING' ? 'PENDING' : status === 'TECHNICIAN_ON_WAY' ? 'ON_THE_WAY' : status; }
+
+function bookingResponse(repair) { return { ...repairResponse(repair), status: dashboardStatus(repair.status) }; }
 
 async function createRepair(req, res, next) {
   try {
@@ -82,4 +86,39 @@ async function getRepair(req, res, next) {
   try { const repairId = parseId(req.params.id, 'repairId'); const repair = await Repair.findOne({ _id: repairId, ...repairQueryForUser(req) }).populate({ path: 'technicianId', select: 'name avatar' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' }).lean(); if (!repair) return res.status(404).json({ success: false, message: 'Repair not found', errors: [] }); return res.json({ success: true, message: 'Repair retrieved', data: { repair: repairResponse(repair) } }); } catch (error) { return next(error); }
 }
 
-module.exports = { createRepair, listRepairs, getRepair };
+async function listTechnicianBookings(req, res, next) {
+  try {
+    const repairs = await Repair.find({ technicianId: req.auth.userId }).sort({ createdAt: -1 }).populate({ path: 'customerId', select: 'name avatar' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' }).lean();
+    return res.json({ success: true, message: 'Technician bookings retrieved', data: { bookings: repairs.map(bookingResponse) } });
+  } catch (error) { return next(error); }
+}
+
+async function updateBookingStatus(req, res, next) {
+  try {
+    const repairId = parseId(req.params.id, 'bookingId');
+    const requestedStatus = req.body?.status;
+    const allowedStatuses = ['ACCEPTED', 'REJECTED', 'ON_THE_WAY', 'COMPLETED'];
+    if (!allowedStatuses.includes(requestedStatus)) throw badRequest('Invalid booking status', [{ field: 'status', message: `Status must be one of: ${allowedStatuses.join(', ')}` }]);
+    const repair = await Repair.findOne({ _id: repairId, technicianId: req.auth.userId }).populate({ path: 'customerId', select: 'name avatar' }).populate({ path: 'addressId', select: 'label fullAddress city state pincode' });
+    if (!repair) return res.status(404).json({ success: false, message: 'Booking not found', errors: [] });
+    const currentStatus = dashboardStatus(repair.status);
+    const transitions = { PENDING: ['ACCEPTED', 'REJECTED'], ACCEPTED: ['ON_THE_WAY'], ON_THE_WAY: ['COMPLETED'] };
+    if (!transitions[currentStatus]?.includes(requestedStatus)) return res.status(422).json({ success: false, message: `Cannot move booking from ${currentStatus} to ${requestedStatus}`, errors: [] });
+    if (requestedStatus === 'REJECTED') {
+      const response = bookingResponse(repair);
+      repair.technicianId = undefined;
+      await repair.save();
+      return res.json({ success: true, message: 'Booking rejected', data: { booking: { ...response, status: 'REJECTED' } } });
+    }
+    const storedStatus = requestedStatus === 'ON_THE_WAY' ? 'TECHNICIAN_ON_WAY' : requestedStatus;
+    repair.status = storedStatus;
+    if (requestedStatus === 'ACCEPTED') repair.acceptedAt = new Date();
+    if (requestedStatus === 'ON_THE_WAY') repair.startedAt = new Date();
+    if (requestedStatus === 'COMPLETED') repair.completedAt = new Date();
+    await repair.save();
+    await RepairStatusHistory.create({ repairId: repair._id, status: storedStatus, changedBy: req.auth.userId, note: `Technician changed booking to ${requestedStatus}` });
+    return res.json({ success: true, message: `Booking marked ${requestedStatus}`, data: { booking: bookingResponse(repair.toObject()) } });
+  } catch (error) { return next(error); }
+}
+
+module.exports = { createRepair, listRepairs, getRepair, listTechnicianBookings, updateBookingStatus };
