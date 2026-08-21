@@ -386,9 +386,74 @@ export function BookingListPage() {
 }
 
 function ReviewForm({ repairId, onSubmitted }) {
-  const [rating, setRating] = useState(5); const [comment, setComment] = useState(''); const [submitting, setSubmitting] = useState(false); const [error, setError] = useState('');
-  const submit = async (event) => { event.preventDefault(); setSubmitting(true); setError(''); try { const { data } = await api.post(`/repairs/${repairId}/review`, { rating, comment }); onSubmitted(data.data.review); } catch (requestError) { setError(requestError.response?.data?.message || 'Unable to submit your review. Please try again.') } finally { setSubmitting(false) } };
-  return <section className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-6"><h2 className="text-xl font-bold">How was your repair?</h2><p className="mt-2 text-sm text-slate-600">Your feedback helps other customers choose with confidence.</p><form onSubmit={submit} className="mt-5"><div className="flex gap-2" aria-label="Rating">{[1, 2, 3, 4, 5].map((value) => <button type="button" key={value} aria-label={`${value} star${value > 1 ? 's' : ''}`} onClick={() => setRating(value)} className={`text-3xl ${value <= rating ? 'text-amber-500' : 'text-slate-300'}`}>★</button>)}</div><label className="mt-4 block text-sm font-semibold">Comment <span className="font-normal text-slate-500">(optional)</span><textarea maxLength="1000" value={comment} onChange={(event) => setComment(event.target.value)} rows="3" className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal" placeholder="Share a few words about the service" /></label>{error && <p role="alert" className="mt-3 text-sm text-red-700">{error}</p>}<button disabled={submitting} className="mt-4 min-h-11 rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white disabled:opacity-50">{submitting ? 'Submitting…' : 'Submit review'}</button></form></section>;
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const submit = async (event) => {
+    event.preventDefault();
+    setSubmitting(true);
+    setError("");
+    try {
+      const { data } = await api.post(`/repairs/${repairId}/review`, {
+        rating,
+        comment,
+      });
+      onSubmitted(data.data.review);
+    } catch (requestError) {
+      setError(
+        requestError.response?.data?.message ||
+          "Unable to submit your review. Please try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  return (
+    <section className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-6">
+      <h2 className="text-xl font-bold">How was your repair?</h2>
+      <p className="mt-2 text-sm text-slate-600">
+        Your feedback helps other customers choose with confidence.
+      </p>
+      <form onSubmit={submit} className="mt-5">
+        <div className="flex gap-2" aria-label="Rating">
+          {[1, 2, 3, 4, 5].map((value) => (
+            <button
+              type="button"
+              key={value}
+              aria-label={`${value} star${value > 1 ? "s" : ""}`}
+              onClick={() => setRating(value)}
+              className={`text-3xl ${value <= rating ? "text-amber-500" : "text-slate-300"}`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+        <label className="mt-4 block text-sm font-semibold">
+          Comment <span className="font-normal text-slate-500">(optional)</span>
+          <textarea
+            maxLength="1000"
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+            rows="3"
+            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal"
+            placeholder="Share a few words about the service"
+          />
+        </label>
+        {error && (
+          <p role="alert" className="mt-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        <button
+          disabled={submitting}
+          className="mt-4 min-h-11 rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white disabled:opacity-50"
+        >
+          {submitting ? "Submitting…" : "Submit review"}
+        </button>
+      </form>
+    </section>
+  );
 }
 
 export function BookingDetailPage() {
@@ -480,7 +545,34 @@ export function BookingDetailPage() {
           </div>
         </dl>
       </section>
-      {repair.status === "COMPLETED" && (repair.review ? <section className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6"><p className="font-bold text-green-800">Your review</p><p className="mt-2 text-amber-600">{"★".repeat(repair.review.rating)}<span className="ml-2 text-slate-700">{repair.review.comment || "Thanks for your feedback."}</span></p></section> : <ReviewForm repairId={repair.id} onSubmitted={(review) => setRepair((current) => ({ ...current, review }))} />)}
+      {repair.status === "COMPLETED" &&
+        (repair.review ? (
+          <section className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-6">
+            <p className="font-bold text-green-800">Your review</p>
+            <p className="mt-2 text-amber-600">
+              {"★".repeat(repair.review.rating)}
+              <span className="ml-2 text-slate-700">
+                {repair.review.comment || "Thanks for your feedback."}
+              </span>
+            </p>
+            {repair.review.createdAt && (
+              <p className="mt-2 text-xs text-slate-400">
+                {new Date(repair.review.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </p>
+            )}
+          </section>
+        ) : (
+          <ReviewForm
+            repairId={repair.id}
+            onSubmitted={(review) =>
+              setRepair((current) => ({ ...current, review }))
+            }
+          />
+        ))}
       <Link
         to="/customer/repairs"
         className="mt-6 inline-block font-semibold text-blue-600"
