@@ -50,11 +50,10 @@ const repairSchema = new mongoose.Schema(
   { timestamps: true, collection: 'repairs' },
 );
 
-repairSchema.pre('validate', function validateRepairLocation(next) {
+repairSchema.pre('validate', function validateRepairLocation() {
   if (!this.addressId && !this.location) {
     this.invalidate('addressId', 'A repair requires an addressId or location');
   }
-  next();
 });
 
 repairSchema.index({ customerId: 1 });
