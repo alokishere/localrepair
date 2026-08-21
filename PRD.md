@@ -5,7 +5,7 @@
 
 ---
 
-## 1. Product Scope
+## 1. Product Scope 
 
 LocalRepair connects customers who need appliance repair with nearby verified repair technicians.
 
