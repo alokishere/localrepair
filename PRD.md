@@ -1392,7 +1392,7 @@ Admin can override when necessary.
 ```env
 NODE_ENV=development
 
-PORT=5000
+PORT=3001
 
 MONGO_URI=
 
@@ -1416,8 +1416,8 @@ GOOGLE_MAPS_API_KEY=
 Frontend:
 
 ```env
-VITE_API_URL=http://localhost:5000/api
-VITE_SOCKET_URL=http://localhost:5000
+VITE_API_URL=http://localhost:3001/api
+VITE_SOCKET_URL=http://localhost:3001
 ```
 
 ---

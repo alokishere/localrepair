@@ -2,7 +2,7 @@
 
 ## Conventions
 
-Base URL: `http://localhost:5000/api` locally; use `VITE_API_URL` in the client. JSON requests use `Content-Type: application/json`. Authentication uses the JWT cookie or bearer token selected during Phase 2. Protected requests must include credentials. All responses use:
+Base URL: `http://localhost:3001/api` locally; use `VITE_API_URL` in the client. JSON requests use `Content-Type: application/json`. Authentication uses the JWT cookie or bearer token selected during Phase 2. Protected requests must include credentials. All responses use:
 
 ```json
 { "success": true, "message": "...", "data": {} }

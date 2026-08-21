@@ -9,5 +9,5 @@ cd backend && npm install && npm start
 cd frontend && npm install && npm run dev
 ```
 
-The frontend runs at `http://localhost:5173` and the API at `http://localhost:5000`.
+The frontend runs at `http://localhost:5173` and the API at `http://localhost:3001`.
 Copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env` when overriding local defaults. Do not commit either `.env` file.

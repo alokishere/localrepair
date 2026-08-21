@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const app = express();
 
 const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
@@ -8,12 +9,14 @@ app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => {
-  res.status(200).json({
+  const databaseConnected = mongoose.connection.readyState === 1;
+  res.status(databaseConnected ? 200 : 503).json({
     success: true,
-    message: 'LocalRepair API is running',
+    message: databaseConnected ? 'LocalRepair API is running' : 'LocalRepair API is running without a database connection',
     data: {
       service: 'backend',
-      status: 'ok',
+      status: databaseConnected ? 'ok' : 'degraded',
+      database: databaseConnected ? 'connected' : 'disconnected',
       timestamp: new Date().toISOString(),
     },
   });
