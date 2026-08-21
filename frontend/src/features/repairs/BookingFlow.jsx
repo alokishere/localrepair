@@ -1,37 +1,40 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react"
 import {
   Link,
   useNavigate,
   useParams,
   useSearchParams,
-} from "react-router-dom";
-import api from "../../services/api";
-import { useAuth } from "../../context/useAuth";
+} from "react-router-dom"
+import api from "../../services/api"
+import { useAuth } from "../../context/useAuth"
+import { useToast } from "../../context/ToastContext"
+import { StatusBadge } from "../../components/ui"
 
 function ErrorBox({ message, onRetry }) {
   return (
     <div
       role="alert"
-      className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700"
+      className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
     >
       {message}
       {onRetry && (
-        <button onClick={onRetry} className="ml-3 font-semibold underline">
+        <button onClick={onRetry} className="ml-3 font-semibold underline hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
           Try again
         </button>
       )}
     </div>
-  );
+  )
 }
 
 export function BookingPage() {
-  const { technicianId } = useParams();
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const [technician, setTechnician] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const { technicianId } = useParams()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const toast = useToast()
+  const [technician, setTechnician] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState("");
   const [form, setForm] = useState({
     categoryId: "",
@@ -90,9 +93,9 @@ export function BookingPage() {
   const update = (field) => (event) =>
     setForm((current) => ({ ...current, [field]: event.target.value }));
   const submit = async (event) => {
-    event.preventDefault();
-    setError("");
-    setSubmitting(true);
+    event.preventDefault()
+    setError("")
+    setSubmitting(true)
     try {
       const { data } = await api.post("/repairs", {
         technicianId,
@@ -109,17 +112,17 @@ export function BookingPage() {
         },
         phone: form.phone,
         customerNotes: form.notes,
-      });
-      navigate(`/customer/repairs/${data.data.repair.id}`);
+      })
+      toast.success("Booking created successfully!")
+      navigate(`/customer/repairs/${data.data.repair.id}`)
     } catch (requestError) {
-      setError(
-        requestError.response?.data?.message ||
-          "Unable to create booking. Please try again.",
-      );
+      const msg = requestError.response?.data?.message || "Unable to create booking. Please try again."
+      setError(msg)
+      toast.error(msg)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
   if (loading)
     return (
       <main className="mx-auto max-w-3xl px-6 py-12">
@@ -168,7 +171,7 @@ export function BookingPage() {
                 required
                 value={form.service}
                 onChange={update("service")}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
             <label className="block text-sm font-semibold">
@@ -177,7 +180,7 @@ export function BookingPage() {
                 required
                 value={form.appliance}
                 onChange={update("appliance")}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
             <label className="block text-sm font-semibold sm:col-span-2">
@@ -188,7 +191,7 @@ export function BookingPage() {
                 value={form.problem}
                 onChange={update("problem")}
                 rows="3"
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
           </div>
@@ -204,7 +207,7 @@ export function BookingPage() {
                 min={new Date().toISOString().slice(0, 10)}
                 value={form.date}
                 onChange={update("date")}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
             <label className="block text-sm font-semibold">
@@ -214,7 +217,7 @@ export function BookingPage() {
                 type="time"
                 value={form.time}
                 onChange={update("time")}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
           </div>
@@ -229,7 +232,7 @@ export function BookingPage() {
                 value={form.fullAddress}
                 onChange={update("fullAddress")}
                 rows="2"
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
             <label className="block text-sm font-semibold">
@@ -238,7 +241,7 @@ export function BookingPage() {
                 required
                 value={form.city}
                 onChange={update("city")}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
             <label className="block text-sm font-semibold">
@@ -247,7 +250,7 @@ export function BookingPage() {
                 required
                 value={form.state}
                 onChange={update("state")}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
             <label className="block text-sm font-semibold">
@@ -257,7 +260,7 @@ export function BookingPage() {
                 pattern="[0-9]{4,10}"
                 value={form.pincode}
                 onChange={update("pincode")}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
           </div>
@@ -272,7 +275,7 @@ export function BookingPage() {
                 pattern="[+0-9][0-9\s-]{7,19}"
                 value={form.phone}
                 onChange={update("phone")}
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
             <label className="block text-sm font-semibold">
@@ -283,7 +286,7 @@ export function BookingPage() {
                 onChange={update("notes")}
                 rows="3"
                 placeholder="Please call before arriving"
-                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"
+                className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </label>
           </div>
@@ -291,7 +294,7 @@ export function BookingPage() {
         {error && <ErrorBox message={error} />}
         <button
           disabled={submitting}
-          className="min-h-12 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="min-h-12 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
         >
           {submitting ? "Creating your booking…" : "Confirm booking"}
         </button>
@@ -304,7 +307,7 @@ function BookingCard({ repair }) {
   return (
     <Link
       to={`/customer/repairs/${repair.id}`}
-      className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:border-blue-300"
+      className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -313,9 +316,7 @@ function BookingCard({ repair }) {
             {repair.technician?.name || "Technician pending"}
           </p>
         </div>
-        <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
-          {repair.status}
-        </span>
+        <StatusBadge status={repair.status} className="shrink-0 self-start" />
       </div>
       <p className="mt-4 text-sm text-slate-600">
         {repair.preferredDate?.slice(0, 10)} · {repair.preferredTime}
@@ -353,7 +354,7 @@ export function BookingListPage() {
         </div>
         <Link
           to="/diagnosis"
-          className="rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white"
+          className="inline-flex items-center rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
         >
           Book a repair
         </Link>
@@ -365,11 +366,13 @@ export function BookingListPage() {
           <ErrorBox message={error} onRetry={load} />
         </div>
       ) : repairs.length === 0 ? (
-        <div className="mt-8 rounded-xl border border-dashed border-slate-300 p-10 text-center">
-          <h2 className="font-bold">You don't have any bookings yet.</h2>
+        <div className="mt-8 rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+          <div className="mx-auto mb-4 text-4xl text-slate-300" aria-hidden="true">🔧</div>
+          <h2 className="font-bold text-slate-800">You don't have any bookings yet.</h2>
+          <p className="mt-2 text-slate-500">Start by diagnosing an appliance issue to find the right technician.</p>
           <Link
             to="/diagnosis"
-            className="mt-4 inline-block font-semibold text-blue-600"
+            className="mt-6 inline-flex items-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
           >
             Start a diagnosis
           </Link>
@@ -386,29 +389,31 @@ export function BookingListPage() {
 }
 
 function ReviewForm({ repairId, onSubmitted }) {
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [rating, setRating] = useState(5)
+  const [comment, setComment] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState("")
+  const toast = useToast()
+
   const submit = async (event) => {
-    event.preventDefault();
-    setSubmitting(true);
-    setError("");
+    event.preventDefault()
+    setSubmitting(true)
+    setError("")
     try {
       const { data } = await api.post(`/repairs/${repairId}/review`, {
         rating,
         comment,
-      });
-      onSubmitted(data.data.review);
+      })
+      toast.success("Review submitted. Thank you!")
+      onSubmitted(data.data.review)
     } catch (requestError) {
-      setError(
-        requestError.response?.data?.message ||
-          "Unable to submit your review. Please try again.",
-      );
+      const msg = requestError.response?.data?.message || "Unable to submit your review. Please try again."
+      setError(msg)
+      toast.error(msg)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
   return (
     <section className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-6">
       <h2 className="text-xl font-bold">How was your repair?</h2>
@@ -417,17 +422,17 @@ function ReviewForm({ repairId, onSubmitted }) {
       </p>
       <form onSubmit={submit} className="mt-5">
         <div className="flex gap-2" aria-label="Rating">
-          {[1, 2, 3, 4, 5].map((value) => (
-            <button
-              type="button"
-              key={value}
-              aria-label={`${value} star${value > 1 ? "s" : ""}`}
-              onClick={() => setRating(value)}
-              className={`text-3xl ${value <= rating ? "text-amber-500" : "text-slate-300"}`}
-            >
-              ★
-            </button>
-          ))}
+            {[1, 2, 3, 4, 5].map((value) => (
+              <button
+                type="button"
+                key={value}
+                aria-label={`${value} star${value > 1 ? "s" : ""}`}
+                onClick={() => setRating(value)}
+                className={`text-3xl transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 ${value <= rating ? "text-amber-500" : "text-slate-300"}`}
+              >
+                ★
+              </button>
+            ))}
         </div>
         <label className="mt-4 block text-sm font-semibold">
           Comment <span className="font-normal text-slate-500">(optional)</span>
@@ -436,7 +441,7 @@ function ReviewForm({ repairId, onSubmitted }) {
             value={comment}
             onChange={(event) => setComment(event.target.value)}
             rows="3"
-            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal"
+            className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             placeholder="Share a few words about the service"
           />
         </label>
@@ -447,7 +452,7 @@ function ReviewForm({ repairId, onSubmitted }) {
         )}
         <button
           disabled={submitting}
-          className="mt-4 min-h-11 rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white disabled:opacity-50"
+          className="mt-4 min-h-11 rounded-xl bg-blue-600 px-5 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
         >
           {submitting ? "Submitting…" : "Submit review"}
         </button>
@@ -513,9 +518,7 @@ export function BookingDetailPage() {
               {repair.technician?.name || "Technician pending confirmation"}
             </p>
           </div>
-          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
-            {repair.status}
-          </span>
+          <StatusBadge status={repair.status} className="shrink-0" />
         </div>
         <dl className="grid gap-4 text-sm sm:grid-cols-2">
           <div>
@@ -575,7 +578,7 @@ export function BookingDetailPage() {
         ))}
       <Link
         to="/customer/repairs"
-        className="mt-6 inline-block font-semibold text-blue-600"
+        className="mt-6 inline-flex items-center font-semibold text-blue-600 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
       >
         View all bookings →
       </Link>

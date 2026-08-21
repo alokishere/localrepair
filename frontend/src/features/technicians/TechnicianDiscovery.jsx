@@ -1,24 +1,24 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
-import api from "../../services/api";
+import { useCallback, useEffect, useState } from "react"
+import { Link, useParams, useSearchParams } from "react-router-dom"
+import api from "../../services/api"
 
 function ErrorState({ message, onRetry }) {
   return (
-    <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+    <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700" role="alert">
       <p>{message}</p>
       <button
         onClick={onRetry}
-        className="mt-4 rounded-lg border border-red-300 px-4 py-2 font-semibold hover:bg-red-100"
+        className="mt-4 rounded-lg border border-red-300 px-4 py-2 font-semibold hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
       >
         Try again
       </button>
     </div>
-  );
+  )
 }
 
 function TechnicianCard({ technician }) {
   return (
-    <article className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <article className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-300 hover:shadow-md">
       <div className="flex items-start gap-4">
         <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-lg font-bold text-blue-700">
           {technician.avatar ? (
@@ -61,9 +61,9 @@ function TechnicianCard({ technician }) {
       </div>
       <Link
         to={`/technicians/${technician.id}`}
-        className="mt-auto pt-6 font-semibold text-blue-600 hover:text-blue-700"
+        className="mt-auto pt-6 font-semibold text-blue-600 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
       >
-        View profile →
+        View profile &rarr;
       </Link>
     </article>
   );
@@ -127,14 +127,12 @@ export function TechnicianListPage() {
           <select
             value={categoryId}
             onChange={(event) => {
-              const value = event.target.value;
-              setCategoryId(value);
-              const selected = categories.find(
-                (category) => category._id === value,
-              );
-              setSearchParams(selected ? { category: selected.slug } : {});
+              const value = event.target.value
+              setCategoryId(value)
+              const selected = categories.find((category) => category._id === value)
+              setSearchParams(selected ? { category: selected.slug } : {})
             }}
-            className="mt-2 block min-w-56 rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal"
+            className="mt-2 block min-w-56 rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           >
             <option value="">All categories</option>
             {categories.map((category) => (
@@ -267,7 +265,7 @@ export function TechnicianProfilePage() {
             </div>
             <Link
               to={`/booking/${technician.id}?category=${bookingCategory}${bookingProblem ? `&problem=${encodeURIComponent(bookingProblem)}` : ""}`}
-              className="mt-5 inline-block rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+              className="mt-5 inline-flex items-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
             >
               Book this service
             </Link>

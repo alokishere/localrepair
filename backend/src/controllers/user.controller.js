@@ -42,6 +42,11 @@ async function updateMe(req, res, next) {
     let profile = null;
     if (user.role === "TECHNICIAN") {
       profile = await TechnicianProfile.findOneAndUpdate({ userId: user._id }, { $set: { userId: user._id, ...(body.serviceArea !== undefined && { serviceArea: clean(body.serviceArea, 200) }), ...(body.city !== undefined && { city: clean(body.city, 80) }), ...(body.pincode !== undefined && { pincode: clean(body.pincode, 10) }), ...(body.experienceYears !== undefined && { experienceYears: Number(body.experienceYears) }), ...(body.startingPrice !== undefined && { startingPrice: Number(body.startingPrice) }), ...(body.skills !== undefined && { skills: Array.isArray(body.skills) ? body.skills.map((item) => clean(item, 80)).filter(Boolean) : [] }), ...(body.isAvailable !== undefined && { isAvailable: Boolean(body.isAvailable) }), ...(body.serviceCategoryIds !== undefined && { serviceCategories: body.serviceCategoryIds }) } }, { upsert: true, returnDocument: "after", runValidators: true }).populate({ path: "serviceCategories", select: "name slug icon" });
+      if (profile && profile.verificationStatus === "PENDING" && profile.serviceArea && profile.serviceCategories?.length > 0) {
+        profile.verificationStatus = "VERIFIED";
+        profile.isAvailable = true;
+        await profile.save();
+      }
     }
     return res.json({ success: true, message: "Profile updated", data: { user, technicianProfile: profile, profileComplete: isComplete(user, profile) } });
   } catch (error) {
