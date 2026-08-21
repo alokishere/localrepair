@@ -1,12 +1,18 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const authRoutes = require('./routes/auth.routes');
+const technicianRoutes = require('./routes/technician.routes');
+const diagnosisRoutes = require('./routes/diagnosis.routes');
 const app = express();
 
 const allowedOrigin = process.env.CLIENT_URL || 'http://localhost:5173';
 
 app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
+app.use('/api/auth', authRoutes);
+app.use('/api', technicianRoutes);
+app.use('/api', diagnosisRoutes);
 
 app.get('/api/health', (req, res) => {
   const databaseConnected = mongoose.connection.readyState === 1;
@@ -32,6 +38,11 @@ app.use((req, res) => {
     message: 'Route not found',
     errors: [],
   });
+});
+
+app.use((error, _req, res, _next) => {
+  console.error('Request failed:', error.message);
+  res.status(error.statusCode || 500).json({ success: false, message: error.statusCode ? error.message : 'An unexpected server error occurred', errors: error.details || [] });
 });
 
 module.exports = app;

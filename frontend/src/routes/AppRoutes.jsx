@@ -1,97 +1,31 @@
 import { useEffect, useState } from 'react'
-import { Link, Outlet, Route, Routes, useLocation } from 'react-router-dom'
+import { Link, Navigate, Outlet, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { useAuth } from '../context/useAuth'
+import { TechnicianListPage, TechnicianProfilePage } from '../features/technicians/TechnicianDiscovery'
+import DiagnosisFlow from '../features/diagnosis/DiagnosisFlow'
 
-const routeLabels = {
-  '/login': 'Login',
-  '/register': 'Register',
-  '/customer/dashboard': 'Customer dashboard',
-  '/customer/repairs/new': 'Book a repair',
-  '/technician/dashboard': 'Technician dashboard',
-}
+const routeLabels = { '/customer/dashboard': 'Customer dashboard', '/customer/repairs/new': 'Book a repair', '/technician/dashboard': 'Technician dashboard' }
 
 function AppShell() {
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4" aria-label="Primary navigation">
-          <Link to="/" className="text-xl font-bold tracking-tight text-slate-900">Local<span className="text-blue-600">Repair</span></Link>
-          <div className="flex items-center gap-3 text-sm font-semibold">
-            <Link to="/login" className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100">Log in</Link>
-            <Link to="/register" className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Get started</Link>
-          </div>
-        </nav>
-      </header>
-      <Outlet />
-    </div>
-  )
+  const { user, isAuthenticated, logout } = useAuth()
+  return <div className="min-h-screen bg-slate-50 text-slate-900"><header className="border-b border-slate-200 bg-white"><nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4" aria-label="Primary navigation"><Link to="/" className="text-xl font-bold tracking-tight">Local<span className="text-blue-600">Repair</span></Link><div className="flex items-center gap-3 text-sm font-semibold"><Link to="/technicians" className="hidden rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100 sm:block">Find technicians</Link>{isAuthenticated ? <><Link to={user.role === 'TECHNICIAN' ? '/technician/dashboard' : '/customer/dashboard'} className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100">Dashboard</Link><button onClick={logout} className="rounded-lg border border-slate-300 px-3 py-2 text-slate-600 hover:bg-slate-50">Log out</button></> : <><Link to="/login" className="rounded-lg px-3 py-2 text-slate-600 hover:bg-slate-100">Log in</Link><Link to="/register" className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">Get started</Link></>}</div></nav></header><Outlet /></div>
 }
 
 function Landing() {
   const [apiStatus, setApiStatus] = useState('checking')
-
-  useEffect(() => {
-    let active = true
-
-    api.get('/health')
-      .then(() => active && setApiStatus('connected'))
-      .catch(() => active && setApiStatus('unavailable'))
-
-    return () => {
-      active = false
-    }
-  }, [])
-
-  return (
-    <main>
-      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-        <div>
-          <p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-blue-600">Trusted local service</p>
-          <h1 className="max-w-2xl text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">Reliable appliance repair, close to home.</h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">Find verified technicians, get clear estimates, and keep your repair moving with confidence.</p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/customer/repairs/new" className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">Book a repair</Link>
-            <Link to="/register" className="rounded-lg border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-700 hover:bg-slate-50">Join as a technician</Link>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-blue-100 bg-blue-50 p-8">
-          <p className="text-sm font-semibold text-blue-700">Phase 0 workspace</p>
-          <h2 className="mt-3 text-2xl font-bold">Your repair journey starts here.</h2>
-          <p className="mt-3 leading-7 text-slate-600">The app shell is ready for authentication, diagnosis, technician discovery, and booking in the next phases.</p>
-          <p className="mt-6 text-sm font-semibold" aria-live="polite">
-            <span className={apiStatus === 'connected' ? 'text-green-600' : apiStatus === 'unavailable' ? 'text-red-600' : 'text-slate-500'}>
-              {apiStatus === 'checking' && 'Checking API connection…'}
-              {apiStatus === 'connected' && 'API connected'}
-              {apiStatus === 'unavailable' && 'API unavailable — check the backend'}
-            </span>
-          </p>
-        </div>
-      </section>
-    </main>
-  )
+  useEffect(() => { api.get('/health').then(() => setApiStatus('connected')).catch(() => setApiStatus('unavailable')) }, [])
+  return <main><section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:items-center"><div><p className="mb-4 text-sm font-bold uppercase tracking-[0.18em] text-blue-600">Trusted local service</p><h1 className="max-w-2xl text-4xl font-bold tracking-tight sm:text-6xl">Reliable appliance repair, close to home.</h1><p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">Find verified technicians, get clear estimates, and keep your repair moving with confidence.</p><Link to="/diagnosis" className="mt-8 inline-block rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">Diagnose your repair</Link></div><div className="rounded-2xl border border-blue-100 bg-blue-50 p-8"><p className="text-sm font-semibold text-blue-700">LocalRepair</p><h2 className="mt-3 text-2xl font-bold">Your repair journey starts here.</h2><p className="mt-3 leading-7 text-slate-600">Start with a quick, transparent diagnosis suggestion before finding a verified technician.</p><p className={`mt-6 text-sm font-semibold ${apiStatus === 'connected' ? 'text-green-600' : apiStatus === 'unavailable' ? 'text-red-600' : 'text-slate-500'}`}>{apiStatus === 'checking' ? 'Checking API connection…' : apiStatus === 'connected' ? 'API connected' : 'API unavailable — check the backend'}</p></div></section></main>
 }
 
-function Placeholder() {
-  const { pathname } = useLocation()
-  const label = routeLabels[pathname] || 'Page'
-  const role = pathname.startsWith('/technician') ? 'Technician' : pathname.startsWith('/customer') ? 'Customer' : 'Public'
-  return (
-    <main className="mx-auto max-w-3xl px-6 py-20">
-      <p className="text-sm font-semibold text-blue-600">{role} workspace</p>
-      <h1 className="mt-3 text-4xl font-bold">{label}</h1>
-      <p className="mt-4 text-lg text-slate-600">This route is reserved for the next implementation phase.</p>
-      <Link to="/" className="mt-8 inline-block rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">Back to home</Link>
-    </main>
-  )
+function AuthPage({ mode }) {
+  const isRegister = mode === 'register'; const { login, register, isAuthenticated } = useAuth(); const navigate = useNavigate(); const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '', role: 'CUSTOMER' }); const [error, setError] = useState(''); const [loading, setLoading] = useState(false)
+  if (isAuthenticated) return <Navigate to="/" replace />
+  const submit = async (event) => { event.preventDefault(); setError(''); if (isRegister && form.password !== form.confirmPassword) { setError('Passwords do not match'); return } setLoading(true); try { const currentUser = isRegister ? await register({ name: form.name, email: form.email, password: form.password, role: form.role }) : await login({ email: form.email, password: form.password }); navigate(currentUser.role === 'TECHNICIAN' ? '/technician/dashboard' : '/customer/dashboard') } catch (requestError) { setError(requestError.response?.data?.message || 'Unable to complete the request') } finally { setLoading(false) } }
+  return <main className="mx-auto max-w-lg px-6 py-16"><h1 className="text-3xl font-bold">{isRegister ? 'Create your account' : 'Welcome back'}</h1><p className="mt-2 text-slate-600">{isRegister ? 'Connect with trusted local repair help.' : 'Sign in to continue to LocalRepair.'}</p><form onSubmit={submit} className="mt-8 space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">{isRegister && <label className="block text-sm font-semibold">Name<input required minLength="2" maxLength="100" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal" /></label>}<label className="block text-sm font-semibold">Email<input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal" /></label><label className="block text-sm font-semibold">Password<input required minLength="8" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal" /></label>{isRegister && <><label className="block text-sm font-semibold">Confirm password<input required minLength="8" type="password" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal" /></label><label className="block text-sm font-semibold">Account type<select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="mt-2 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal"><option value="CUSTOMER">Customer</option><option value="TECHNICIAN">Technician</option></select></label></>} {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}<button disabled={loading} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">{loading ? 'Please wait…' : isRegister ? 'Create account' : 'Log in'}</button><p className="text-center text-sm text-slate-600">{isRegister ? <>Already registered? <Link className="font-semibold text-blue-600" to="/login">Log in</Link></> : <>Need an account? <Link className="font-semibold text-blue-600" to="/register">Register</Link></>}</p></form></main>
 }
 
-export default function AppRoutes() {
-  return (
-    <Routes>
-      <Route element={<AppShell />}>
-        <Route path="/" element={<Landing />} />
-        <Route path="*" element={<Placeholder />} />
-      </Route>
-    </Routes>
-  )
-}
+function ProtectedRoute({ role }) { const { user, loading, isAuthenticated } = useAuth(); if (loading) return <main className="p-10 text-center">Loading your session…</main>; if (!isAuthenticated) return <Navigate to="/login" replace />; if (role && user.role !== role) return <Navigate to={user.role === 'TECHNICIAN' ? '/technician/dashboard' : '/customer/dashboard'} replace />; return <Outlet /> }
+function Placeholder() { const { pathname } = useLocation(); return <main className="mx-auto max-w-3xl px-6 py-20"><p className="text-sm font-semibold text-blue-600">Protected workspace</p><h1 className="mt-3 text-4xl font-bold">{routeLabels[pathname] || 'Page'}</h1><p className="mt-4 text-lg text-slate-600">This route is reserved for the next implementation phase.</p></main> }
+
+export default function AppRoutes() { return <Routes><Route element={<AppShell />}><Route path="/" element={<Landing />} /><Route path="/login" element={<AuthPage mode="login" />} /><Route path="/register" element={<AuthPage mode="register" />} /><Route path="/diagnosis" element={<DiagnosisFlow />} /><Route path="/technicians" element={<TechnicianListPage />} /><Route path="/technicians/:id" element={<TechnicianProfilePage />} /><Route element={<ProtectedRoute role="CUSTOMER" />}><Route path="/customer/dashboard" element={<Placeholder />} /><Route path="/customer/repairs/new" element={<Placeholder />} /></Route><Route element={<ProtectedRoute role="TECHNICIAN" />}><Route path="/technician/dashboard" element={<Placeholder />} /></Route><Route path="*" element={<Navigate to="/" replace />} /></Route></Routes> }
