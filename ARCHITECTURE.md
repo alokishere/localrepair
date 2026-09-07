@@ -184,7 +184,7 @@ The allowed MVP status path is `SEARCHING → ACCEPTED → TECHNICIAN_ON_WAY →
 Vercel (React/Vite) → Render/Railway (Express) → MongoDB Atlas
 ```
 
-Configure `VITE_API_URL`, `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, and `NODE_ENV` through the hosting provider. Seed demo data against a safe demo database only.
+Configure `VITE_API_URL`, `MONGODB_URI`, `JWT_SECRET`, `CLIENT_URL`, and `NODE_ENV` through the hosting provider. Seed demo data against a safe demo database only. `MONGO_URI` remains accepted for backwards compatibility, but new deployments should use `MONGODB_URI`.
 
 ## 12. Security baseline
 
