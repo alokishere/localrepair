@@ -10,9 +10,51 @@ const userRoutes = require("./routes/user.routes");
 const { connectDB } = require("./config/db");
 const app = express();
 
+const responseCache = new Map();
+const CACHE_TTL_MS = 30 * 1000;
+const MAX_CACHE_ENTRIES = 100;
+
+function cacheKey(req) {
+  return `${req.method}:${req.originalUrl}`;
+}
+
+function publicResponseCache(req, res, next) {
+  if (req.method !== "GET" || req.headers.authorization) return next();
+
+  const key = cacheKey(req);
+  const cached = responseCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) {
+    return res.status(cached.status).json(cached.body);
+  }
+  if (cached) responseCache.delete(key);
+
+  const sendJson = res.json.bind(res);
+  res.json = (body) => {
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      if (responseCache.size >= MAX_CACHE_ENTRIES) {
+        responseCache.delete(responseCache.keys().next().value);
+      }
+      responseCache.set(key, {
+        body,
+        status: res.statusCode,
+        expiresAt: Date.now() + CACHE_TTL_MS,
+      });
+    }
+    return sendJson(body);
+  };
+  return next();
+}
+
+function invalidateResponseCache(req, _res, next) {
+  if (req.method !== "GET") responseCache.clear();
+  return next();
+}
+
 
 app.use(cors());
 app.use(express.json());
+app.use(publicResponseCache);
+app.use(invalidateResponseCache);
 
 app.use(async (_req, res, next) => {
   try {
