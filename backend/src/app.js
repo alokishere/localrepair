@@ -7,12 +7,28 @@ const diagnosisRoutes = require("./routes/diagnosis.routes");
 const repairRoutes = require("./routes/repair.routes");
 const reviewRoutes = require("./routes/review.routes");
 const userRoutes = require("./routes/user.routes");
+const { connectDB } = require("./config/db");
 const app = express();
 
 const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 
 app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
+
+app.use(async (_req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("Database unavailable for request:", error.name || "MongoError");
+    res.status(503).json({
+      success: false,
+      message: "Database unavailable",
+      errors: [],
+    });
+  }
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api", technicianRoutes);

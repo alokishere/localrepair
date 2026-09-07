@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+let connectionPromise;
+let listenersAttached = false;
 
 const getMongoUri = () => (process.env.MONGODB_URI || process.env.MONGO_URI || "").trim();
 
@@ -13,32 +15,38 @@ function describeMongoError(error) {
 }
 
 async function connectDB() {
+  if (mongoose.connection.readyState === 1) return mongoose.connection;
+  if (connectionPromise) return connectionPromise;
+
   const mongoUri = getMongoUri();
 
   if (!mongoUri) {
     throw new Error("MONGODB_URI is not configured");
   }
 
-  mongoose.connection.once("connected", () => {
-    console.log(`MongoDB connected using ${getMongoEnvName()}`);
-  });
+  if (!listenersAttached) {
+    mongoose.connection.once("connected", () => {
+      console.log(`MongoDB connected using ${getMongoEnvName()}`);
+    });
+    mongoose.connection.on("error", (error) => {
+      console.error("MongoDB connection error:", describeMongoError(error));
+    });
+    mongoose.connection.on("disconnected", () => {
+      console.error("MongoDB disconnected");
+    });
+    listenersAttached = true;
+  }
 
-  mongoose.connection.on("error", (error) => {
-    console.error("MongoDB connection error:", describeMongoError(error));
-  });
-
-  mongoose.connection.on("disconnected", () => {
-    console.error("MongoDB disconnected");
-  });
-
-  await mongoose.connect(mongoUri, {
+  connectionPromise = mongoose.connect(mongoUri, {
     serverSelectionTimeoutMS: 10000,
     connectTimeoutMS: 10000,
-  }).catch((error) => {
+  }).then(() => mongoose.connection).catch((error) => {
     console.error("MongoDB startup connection failed:", describeMongoError(error));
+    connectionPromise = undefined;
     throw error;
   });
-  return mongoose.connection;
+
+  return connectionPromise;
 }
 
 module.exports = { connectDB, getMongoUri, getMongoEnvName };
