@@ -9,6 +9,7 @@ import { BookingPage, BookingListPage, BookingDetailPage } from "../features/rep
 import TechnicianDashboard from "../features/technicians/TechnicianDashboard"
 import CustomerDashboard from "../features/customer/CustomerDashboard"
 import ProfilePage from "../features/profile/ProfilePage"
+import LandingPage from "./Landing"
 
 /* ═══════════════════════════════════════════════════════════════
    APP SHELL — Header, Mobile Nav, Outlet
@@ -45,6 +46,9 @@ function AppShell() {
             </>
           ) : (
             <>
+              <a href="#how-it-works" className="nav-link">How it works</a>
+              <a href="#services" className="nav-link">Services</a>
+              <a href="#for-technicians" className="nav-link">For technicians</a>
               <Link to="/login" className="nav-link">Log in</Link>
               <Link to="/register" className="btn-primary btn-sm">Get started</Link>
             </>
@@ -97,6 +101,9 @@ function AppShell() {
               </>
             ) : (
               <>
+                <a onClick={() => setMobileOpen(false)} href="#how-it-works" className="nav-link w-full">How it works</a>
+                <a onClick={() => setMobileOpen(false)} href="#services" className="nav-link w-full">Services</a>
+                <a onClick={() => setMobileOpen(false)} href="#for-technicians" className="nav-link w-full">For technicians</a>
                 <Link onClick={() => setMobileOpen(false)} to="/login" className="nav-link w-full">
                   Log in
                 </Link>
@@ -400,6 +407,8 @@ function ProtectedRoute({ role }) {
   return <Outlet />
 }
 
+Landing.displayName = "LegacyLanding"
+
 /* ═══════════════════════════════════════════════════════════════
    LOGGED-IN HOME
    ═══════════════════════════════════════════════════════════════ */
@@ -560,7 +569,7 @@ function HomeRedirect() {
       </main>
     )
   }
-  return isAuthenticated ? <LoggedInHome /> : <Landing />
+  return isAuthenticated ? <LoggedInHome /> : <LandingPage />
 }
 
 /* ═══════════════════════════════════════════════════════════════
