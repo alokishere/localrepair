@@ -2,14 +2,18 @@ import { Link } from "react-router-dom"
 
 export default function EmptyState({ title, description, actionLabel, actionTo, icon }) {
   return (
-    <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
-      {icon && <div className="mx-auto mb-4 text-4xl text-slate-300">{icon}</div>}
-      <h2 className="text-xl font-bold text-slate-800">{title}</h2>
-      <p className="mt-2 text-slate-500">{description}</p>
+    <div className="rounded-[var(--radius-lg)] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-bg)] p-12 text-center">
+      {icon && (
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-surface-light)]">
+          <span className="text-2xl text-[var(--color-ink-muted)]" aria-hidden="true">{icon}</span>
+        </div>
+      )}
+      <h2 className="text-lg font-semibold text-[var(--color-ink)]">{title}</h2>
+      <p className="mt-2 text-[var(--color-ink-secondary)]">{description}</p>
       {actionLabel && actionTo && (
         <Link
           to={actionTo}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+          className="btn-primary mt-6 inline-flex"
         >
           {actionLabel}
         </Link>

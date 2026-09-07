@@ -10,13 +10,18 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
-          <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <p className="mb-2 text-sm font-semibold text-red-600">Something went wrong</p>
-            <h1 className="mb-3 text-2xl font-bold text-slate-900">We could not load this page.</h1>
-            <p className="mb-6 text-slate-600">Refresh the page and try again.</p>
+        <main className="flex min-h-screen items-center justify-center bg-[var(--color-surface)] px-6">
+          <section className="w-full max-w-md rounded-[var(--radius-lg)] bg-[var(--color-bg)] p-8 text-center" style={{ boxShadow: "var(--shadow-card)" }}>
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-danger-light)]">
+              <span className="text-[var(--color-danger)]" aria-hidden="true">!</span>
+            </div>
+            <p className="mb-2 text-sm font-semibold text-[var(--color-danger)]">Something went wrong</p>
+            <h1 className="mb-3 text-2xl font-bold text-[var(--color-ink)]" style={{ lineHeight: 1.2 }}>
+              We could not load this page.
+            </h1>
+            <p className="mb-6 text-[var(--color-ink-secondary)]">Refresh the page and try again.</p>
             <button
-              className="min-h-11 rounded-lg bg-blue-600 px-5 font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+              className="btn-primary"
               onClick={() => window.location.reload()}
             >
               Refresh page

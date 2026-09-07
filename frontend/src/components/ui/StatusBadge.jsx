@@ -1,23 +1,32 @@
 const STATUS_CONFIG = {
-  SEARCHING: { label: "Searching", color: "bg-amber-100 text-amber-700" },
-  ACCEPTED: { label: "Accepted", color: "bg-blue-100 text-blue-700" },
-  TECHNICIAN_ON_WAY: { label: "On the way", color: "bg-cyan-100 text-cyan-700" },
-  ON_THE_WAY: { label: "On the way", color: "bg-cyan-100 text-cyan-700" },
-  ARRIVED: { label: "Arrived", color: "bg-indigo-100 text-indigo-700" },
-  DIAGNOSING: { label: "Diagnosing", color: "bg-purple-100 text-purple-700" },
-  ESTIMATE_SENT: { label: "Estimate sent", color: "bg-orange-100 text-orange-700" },
-  CUSTOMER_APPROVED: { label: "Approved", color: "bg-teal-100 text-teal-700" },
-  IN_PROGRESS: { label: "In progress", color: "bg-blue-100 text-blue-700" },
-  COMPLETED: { label: "Completed", color: "bg-green-100 text-green-700" },
-  CANCELLED: { label: "Cancelled", color: "bg-slate-100 text-slate-600" },
-  PENDING: { label: "Pending", color: "bg-amber-100 text-amber-700" },
-  REJECTED: { label: "Rejected", color: "bg-red-100 text-red-700" },
+  SEARCHING: { label: "Searching", variant: "warning" },
+  ACCEPTED: { label: "Accepted", variant: "primary" },
+  TECHNICIAN_ON_WAY: { label: "On the way", variant: "info" },
+  ON_THE_WAY: { label: "On the way", variant: "info" },
+  ARRIVED: { label: "Arrived", variant: "info" },
+  DIAGNOSING: { label: "Diagnosing", variant: "info" },
+  ESTIMATE_SENT: { label: "Estimate sent", variant: "warning" },
+  CUSTOMER_APPROVED: { label: "Approved", variant: "success" },
+  IN_PROGRESS: { label: "In progress", variant: "primary" },
+  COMPLETED: { label: "Completed", variant: "success" },
+  CANCELLED: { label: "Cancelled", variant: "default" },
+  PENDING: { label: "Pending", variant: "warning" },
+  REJECTED: { label: "Rejected", variant: "danger" },
+}
+
+const variantStyles = {
+  default: "bg-[var(--color-surface-light)] text-[var(--color-ink-secondary)]",
+  primary: "bg-[var(--color-primary-light)] text-[var(--color-primary)]",
+  success: "bg-[var(--color-success-light)] text-[var(--color-success)]",
+  warning: "bg-[var(--color-warning-light)] text-[var(--color-warning)]",
+  danger: "bg-[var(--color-danger-light)] text-[var(--color-danger)]",
+  info: "bg-[var(--color-info-light)] text-[var(--color-info)]",
 }
 
 export default function StatusBadge({ status, className = "" }) {
-  const config = STATUS_CONFIG[status] || { label: status, color: "bg-slate-100 text-slate-700" }
+  const config = STATUS_CONFIG[status] || { label: status?.replace(/_/g, " ") || "Unknown", variant: "default" }
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${config.color} ${className}`}>
+    <span className={`badge ${variantStyles[config.variant]} ${className}`}>
       {config.label}
     </span>
   )
