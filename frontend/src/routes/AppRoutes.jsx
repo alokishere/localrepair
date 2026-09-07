@@ -10,6 +10,7 @@ import TechnicianDashboard from "../features/technicians/TechnicianDashboard"
 import CustomerDashboard from "../features/customer/CustomerDashboard"
 import ProfilePage from "../features/profile/ProfilePage"
 import LandingPage from "./Landing"
+import AuthScreen from "./AuthPage"
 
 /* ═══════════════════════════════════════════════════════════════
    APP SHELL — Header, Mobile Nav, Outlet
@@ -46,9 +47,9 @@ function AppShell() {
             </>
           ) : (
             <>
-              <a href="#how-it-works" className="nav-link">How it works</a>
-              <a href="#services" className="nav-link">Services</a>
-              <a href="#for-technicians" className="nav-link">For technicians</a>
+              <Link to="/#how-it-works" className="nav-link">How it works</Link>
+              <Link to="/#services" className="nav-link">Services</Link>
+              <Link to="/#for-technicians" className="nav-link">For technicians</Link>
               <Link to="/login" className="nav-link">Log in</Link>
               <Link to="/register" className="btn-primary btn-sm">Get started</Link>
             </>
@@ -101,9 +102,9 @@ function AppShell() {
               </>
             ) : (
               <>
-                <a onClick={() => setMobileOpen(false)} href="#how-it-works" className="nav-link w-full">How it works</a>
-                <a onClick={() => setMobileOpen(false)} href="#services" className="nav-link w-full">Services</a>
-                <a onClick={() => setMobileOpen(false)} href="#for-technicians" className="nav-link w-full">For technicians</a>
+                <Link onClick={() => setMobileOpen(false)} to="/#how-it-works" className="nav-link w-full">How it works</Link>
+                <Link onClick={() => setMobileOpen(false)} to="/#services" className="nav-link w-full">Services</Link>
+                <Link onClick={() => setMobileOpen(false)} to="/#for-technicians" className="nav-link w-full">For technicians</Link>
                 <Link onClick={() => setMobileOpen(false)} to="/login" className="nav-link w-full">
                   Log in
                 </Link>
@@ -386,6 +387,8 @@ function AuthPage({ mode }) {
   )
 }
 
+AuthPage.displayName = "LegacyAuthPage"
+
 /* ═══════════════════════════════════════════════════════════════
    PROTECTED ROUTE
    ═══════════════════════════════════════════════════════════════ */
@@ -581,8 +584,8 @@ export default function AppRoutes() {
     <Routes>
       <Route element={<AppShell />}>
         <Route path="/" element={<HomeRedirect />} />
-        <Route path="/login" element={<AuthPage mode="login" />} />
-        <Route path="/register" element={<AuthPage mode="register" />} />
+        <Route path="/login" element={<AuthScreen mode="login" />} />
+        <Route path="/register" element={<AuthScreen mode="register" />} />
         <Route path="/diagnosis" element={<DiagnosisFlow />} />
         <Route path="/technicians" element={<TechnicianListPage />} />
         <Route path="/technicians/:id" element={<TechnicianProfilePage />} />
