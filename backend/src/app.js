@@ -10,9 +10,8 @@ const userRoutes = require("./routes/user.routes");
 const { connectDB } = require("./config/db");
 const app = express();
 
-const allowedOrigin = process.env.CLIENT_URL || "http://localhost:5173";
 
-app.use(cors({ origin: allowedOrigin }));
+app.use(cors());
 app.use(express.json());
 
 app.use(async (_req, res, next) => {
